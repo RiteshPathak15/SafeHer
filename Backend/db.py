@@ -15,6 +15,15 @@ def init_db():
                 password_hash TEXT NOT NULL
             );
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                message TEXT NOT NULL,
+                location TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
         conn.commit()
 
 def query_one(query, args=()):
