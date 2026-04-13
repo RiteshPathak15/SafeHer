@@ -51,7 +51,7 @@ top_districts = district_crimes.head(5)
 cols = st.columns(len(top_districts))
 for i, (_, row) in enumerate(top_districts.iterrows()):
     with cols[i]:
-        st.metric(label=row['DISTRICT'], value=f"{int(row['Filtered Crimes']):,}", delta="Crimes")
+        st.metric(label=row['DISTRICT'], value=f"{int(row['Filtered Crimes']):,}")
 
 # Choropleth map for states (India level)
 st.subheader(f"India State Crime Intensity Map ({selected_year})")

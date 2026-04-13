@@ -63,11 +63,6 @@ st.markdown(
           <h1>SafeHer: Empowering Safety Through Data</h1>
           <p>SafeHer helps users explore crime insights, make safer choices, and connect with others via secure chat and location sharing.</p>
           <p>Built to combine easy-to-use analytics with practical safety tools, all in one responsive web app.</p>
-          <div>
-            <span class='badge'>Women Safety</span>
-            <span class='badge'>Live Chat</span>
-            <span class='badge'>Data Insights</span>
-          </div>
         </div>
         <div style='flex:1; min-width:320px;'>
           <img src='https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=900&q=80' width='100%' style='border-radius:18px; border:1px solid rgba(148,163,184,0.2);' />
@@ -78,6 +73,23 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# ---- Quick Navigation Buttons (inside card styling) ----
+st.markdown("<div style='margin: 16px 0;'></div>", unsafe_allow_html=True)
+col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
+
+with col1:
+    if st.button("🗺️ Women Safety", use_container_width=True, key="badge_safety"):
+        st.switch_page("pages/5_Safety_Map.py")
+
+with col2:
+    if st.button("💬 Global Chat", use_container_width=True, key="badge_chat"):
+        st.switch_page("pages/6_GlobalChat.py")
+
+with col3:
+    if st.button("📊 Data Insights", use_container_width=True, key="badge_data"):
+        st.switch_page("pages/2_dashboard.py")
+
 
 st.markdown("### What SafeHer Provides")
 row1, row2 = st.columns(2)

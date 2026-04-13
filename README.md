@@ -7,14 +7,14 @@ Women’s safety is a major concern in many parts of India. Crime data related t
 
 SafeHer is designed to analyze district-level crime data related to women across India. The system processes government crime datasets to identify patterns such as crime trends, high-risk districts, and crime categories. Machine learning techniques are used to predict risk levels in different districts.
 
-The results are presented through interactive dashboards, charts, and maps, enabling users to easily understand crime patterns. Additionally, the system includes a chatbot and an emergency feature that allows users to share their location if they feel unsafe.
+The results are presented through interactive dashboards, charts, and maps, enabling users to easily understand crime patterns. Additionally, the system includes a global chat and an emergency feature that allows users to share their location if they feel unsafe.
 
 ## 2. Objectives
 - Analyze crime data related to women across different districts in India.
 - Identify crime trends and high-risk areas using data analysis.
 - Predict district-level risk levels using machine learning models.
 - Present crime insights through interactive dashboards and visualizations.
-- Provide a chatbot interface for answering safety-related queries.
+- Provide a global chat interface for real-time user conversations.
 - Allow users to share their location during unsafe situations for assistance.
 
 ## 3. Scope

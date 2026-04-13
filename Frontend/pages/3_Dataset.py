@@ -1,191 +1,403 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 from pathlib import Path
+import plotly.express as px
+import plotly.graph_objects as go
 
-st.set_page_config(page_title="SafeHer - Dataset Explorer", layout="wide")
+st.set_page_config(page_title="SafeHer - Data Science Lab", layout="wide", page_icon="🔬")
 
+# -------- AUTH CHECK --------
 if "logged_in" not in st.session_state or not st.session_state.logged_in:
     st.warning("Please login first in Login page")
     st.stop()
 
-st.title("SafeHer Dataset Explorer")
+# -------- STYLING --------
+st.markdown("""
+<style>
+.dataset-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 20px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.dataset-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.dataset-desc {
+    font-size: 14px;
+    opacity: 0.9;
+}
+.insight-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    margin-bottom: 15px;
+}
+.emergency-banner {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# locate dataset folder in Frontend/data
+# -------- HEADER --------
+st.title("� SafeHer Data Science Lab")
+st.markdown("**Advanced Analytics & Research Tools for Women's Safety Data**")
+
+# -------- DATA DIRECTORY --------
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 if not DATA_DIR.exists():
     DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
-st.markdown(f"**Dataset folder**: `{DATA_DIR}`")
-
+# -------- LOAD DATASETS --------
 csv_files = sorted(DATA_DIR.glob("*.csv")) if DATA_DIR.exists() else []
 if not csv_files:
-    st.error("No CSV datasets found in data/ folder.")
+    st.error("No datasets found. Please ensure CSV files are in the data/ folder.")
     st.stop()
 
-selected_file = st.selectbox("Choose dataset", [f.name for f in csv_files], index=0)
-path = DATA_DIR / selected_file
-
-try:
-    df = pd.read_csv(path)
-except Exception as err:
-    st.error(f"Could not read file {selected_file}: {err}")
-    st.stop()
-
-st.markdown(f"### Loaded: {selected_file}")
-st.write(f"Rows: {len(df):,}, Columns: {len(df.columns)}")
-
-# clean dataset: drop unnecessary columns and rename for clarity
-unnecessary_cols = [c for c in df.columns if c.strip().lower().startswith("si. no") or c.strip().lower().startswith("total cities") or c.strip() == ""]
-if unnecessary_cols:
-    df = df.drop(columns=unnecessary_cols, errors='ignore')
-
-rename_map = {}
-if "STATE/UT" in df.columns:
-    rename_map["STATE/UT"] = "State/UT"
-if "DISTRICT" in df.columns:
-    rename_map["DISTRICT"] = "District"
-if "Si. No. (Col. 1)" in df.columns:
-    rename_map["Si. No. (Col. 1)"] = "Index"
-if "City (Col. 2)" in df.columns:
-    rename_map["City (Col. 2)"] = "City"
-if rename_map:
-    df = df.rename(columns=rename_map)
-
-# define emergency helpline by state (default national 1091)
-state_emergency = {
-    "Andhra Pradesh": "1091",
-    "Arunachal Pradesh": "1091",
-    "Assam": "1091",
-    "Bihar": "1091",
-    "Chhattisgarh": "1091",
-    "Goa": "1091",
-    "Gujarat": "1091",
-    "Haryana": "1091",
-    "Himachal Pradesh": "1091",
-    "Jharkhand": "1091",
-    "Karnataka": "1091",
-    "Kerala": "1091",
-    "Madhya Pradesh": "1091",
-    "Maharashtra": "1091",
-    "Manipur": "1091",
-    "Meghalaya": "1091",
-    "Mizoram": "1091",
-    "Nagaland": "1091",
-    "Odisha": "1091",
-    "Punjab": "1091",
-    "Rajasthan": "1091",
-    "Sikkim": "1091",
-    "Tamil Nadu": "1091",
-    "Telangana": "1091",
-    "Tripura": "1091",
-    "Uttar Pradesh": "1091",
-    "Uttarakhand": "1091",
-    "West Bengal": "1091",
-    "Delhi": "112",  # central emergency
-    "Jammu & Kashmir": "1091",
-    "Ladakh": "1091",
-    "Andaman & Nicobar Islands": "1091",
-    "Chandigarh": "1091",
-    "Dadra and Nagar Haveli & Daman and Diu": "1091",
-    "Lakshadweep": "1091",
-    "Puducherry": "1091",
+# Dataset descriptions
+DATASET_INFO = {
+    "dstrCAW_1.csv": {
+        "name": "📍 District-Level Crime Against Women",
+        "description": "Comprehensive district-wise crime statistics across India",
+        "type": "crime",
+        "columns": ["District", "State/UT", "Year", "Rape", "Kidnapping", "Dowry Deaths", "Cruelty"]
+    },
+    "NCRB_CII-2020_Table.No-19B.2.csv": {
+        "name": "📊 NCRB Crime Index (State Level)",
+        "description": "National Crime Records Bureau crime index data by state",
+        "type": "crime_index",
+        "columns": ["State/UT", "Crime Index", "Population", "Rate per lakh"]
+    }
 }
 
-# identify crime columns for stats
-crime_columns = [c for c in df.columns if c in ["Rape", "Kidnapping and Abduction", "Dowry Deaths", "Assault on women with intent to outrage her modesty", "Insult to modesty of Women", "Cruelty by Husband or his Relatives", "Importation of Girls"]]
+# -------- DATASET SELECTION --------
+st.markdown("### � Select Dataset for Analysis")
 
-# if crime dataset
-if crime_columns:
-    df_analysis = df.copy()
-    if "Year" in df_analysis.columns:
-        df_analysis["Year"] = pd.to_numeric(df_analysis["Year"], errors='coerce')
+# Create cards for each dataset
+cols = st.columns(len(csv_files))
+for i, file_path in enumerate(csv_files):
+    filename = file_path.name
+    info = DATASET_INFO.get(filename, {
+        "name": filename.replace(".csv", "").replace("_", " "),
+        "description": "Dataset analysis and insights",
+        "type": "general"
+    })
 
-    grouping_col = "State/UT" if "State/UT" in df_analysis.columns else ("City" if "City" in df_analysis.columns else None)
-    group_name = "State/UT" if grouping_col == "State/UT" else "City"
+    with cols[i]:
+        st.markdown(f"""
+        <div class='dataset-card'>
+            <div class='dataset-title'>{info['name']}</div>
+            <div class='dataset-desc'>{info['description']}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if grouping_col:
-        summary = df_analysis.groupby(grouping_col)[crime_columns].sum()
-        summary["Total Cases"] = summary.sum(axis=1)
-        summary = summary.sort_values("Total Cases", ascending=False)
+selected_file = st.selectbox("🔍 Select Dataset to Explore", [f.name for f in csv_files], index=0)
+path = DATA_DIR / selected_file
 
-        total_cases = int(summary["Total Cases"].sum())
-        highest_state = summary.index[0]
-        highest_total = int(summary.iloc[0]["Total Cases"])
-        lowest_state = summary.index[-1]
-        lowest_total = int(summary.iloc[-1]["Total Cases"])
+# -------- LOAD SELECTED DATASET --------
+try:
+    df = pd.read_csv(path)
+    st.success(f"✅ Loaded {selected_file} successfully!")
+except Exception as err:
+    st.error(f"❌ Error loading {selected_file}: {err}")
+    st.stop()
 
-        pct_change = None
-        if "Year" in df_analysis.columns and df_analysis["Year"].notna().any():
-            yearly_total = df_analysis.groupby("Year")[crime_columns].sum().sum(axis=1).sort_index()
-            if len(yearly_total) > 1:
-                last, prev = yearly_total.iloc[-1], yearly_total.iloc[-2]
-                if prev != 0:
-                    pct_change = (last - prev) / prev * 100
+# -------- DATA PROFILING --------
+st.markdown("---")
+st.markdown("## 🔍 Data Profiling & Quality Check")
 
-        st.markdown("## Key Insights")
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Total cases", f"{total_cases:,}")
-        c2.metric("Highest", f"{highest_state} ({highest_total:,})")
-        c3.metric("Lowest", f"{lowest_state} ({lowest_total:,})")
-        c4.metric("% change (year over year)", f"{pct_change:+.2f}%" if pct_change is not None else "N/A")
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric("📏 Shape", f"{df.shape[0]} × {df.shape[1]}")
+with col2:
+    missing_pct = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
+    st.metric("❓ Missing Data", f"{missing_pct:.1f}%")
+with col3:
+    dup_count = df.duplicated().sum()
+    st.metric("🔄 Duplicates", dup_count)
+with col4:
+    memory_mb = df.memory_usage(deep=True).sum() / 1024 / 1024
+    st.metric("💾 Memory", f"{memory_mb:.1f} MB")
 
-        st.markdown("### Emergency call number for women safety")
-        if grouping_col == "State/UT":
-            selected_state = st.selectbox("Select State/UT", [str(s) for s in summary.index], index=0)
-            emergency_number = state_emergency.get(selected_state, "1091")
-            st.success(f"{selected_state} women safety helpline: {emergency_number}")
+# Data quality checks
+st.markdown("### 📋 Data Quality Report")
+quality_cols = st.columns(3)
 
-        st.markdown("---")
+with quality_cols[0]:
+    st.markdown("**Column Types:**")
+    dtype_counts = df.dtypes.value_counts()
+    for dtype, count in dtype_counts.items():
+        st.write(f"- {dtype}: {count}")
 
-        display_df = summary.reset_index().rename(columns={grouping_col: group_name})
+with quality_cols[1]:
+    st.markdown("**Missing Values by Column:**")
+    missing_by_col = df.isnull().sum()
+    missing_cols = missing_by_col[missing_by_col > 0]
+    if len(missing_cols) > 0:
+        for col, count in missing_cols.head(5).items():
+            pct = (count / len(df)) * 100
+            st.write(f"- {col}: {count} ({pct:.1f}%)")
+    else:
+        st.write("✅ No missing values!")
 
-        # conditional style: high values red, low values green in numeric columns
-        numeric_cols = display_df.select_dtypes(include=["number"]).columns.tolist()
-        if "Total Cases" in numeric_cols:
-            high_threshold = display_df["Total Cases"].quantile(0.9)
-            low_threshold = display_df["Total Cases"].quantile(0.1)
+with quality_cols[2]:
+    st.markdown("**Data Range Check:**")
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    if len(numeric_cols) > 0:
+        st.write(f"Numeric columns: {len(numeric_cols)}")
+        negative_vals = (df[numeric_cols] < 0).sum().sum()
+        st.write(f"Negative values: {negative_vals}")
+        zero_vals = (df[numeric_cols] == 0).sum().sum()
+        st.write(f"Zero values: {zero_vals}")
+    else:
+        st.write("No numeric columns found")
 
-            def style_value(v):
-                if pd.isna(v) or not isinstance(v, (int, float, complex)):
-                    return ""
-                if v >= high_threshold:
-                    return "background-color: #f8d7da; color: #842029"
-                if v <= low_threshold:
-                    return "background-color: #d1e7dd; color: #0f5132"
-                return ""
+# -------- EMERGENCY RESOURCES BANNER --------
+st.markdown("""
+<div class='emergency-banner'>
+    <h3>🚨 Women's Safety Emergency Helplines</h3>
+    <p><strong>National Helpline:</strong> 1091 | <strong>Police:</strong> 100 | <strong>Women Helpline:</strong> 181</p>
+    <p><em>In case of emergency, call immediately!</em></p>
+</div>
+""", unsafe_allow_html=True)
 
-            st.subheader(f"{group_name} crime overview (sorted by total cases)")
-            st.write(display_df.style.applymap(style_value, subset=numeric_cols))
-        else:
-            st.subheader(f"{group_name} crime overview (sorted by total cases)")
-            st.dataframe(display_df)
+# -------- ADVANCED ANALYSIS TOOLS --------
+st.markdown("---")
+st.markdown("## 🛠️ Advanced Analysis Tools")
 
-        if "Year" in df_analysis.columns:
-            st.subheader("Trend by year")
-            yearly = df_analysis.groupby("Year")[crime_columns].sum().sort_index()
-            st.line_chart(yearly)
+analysis_tabs = st.tabs(["📊 Statistical Analysis", "🔗 Correlation Analysis", "🔍 Custom Queries"])
+# Tab 1: Statistical Analysis
+with analysis_tabs[0]:
+    st.markdown("### 📊 Statistical Summary")
+
+    if len(df.select_dtypes(include=[np.number]).columns) > 0:
+        # Descriptive statistics
+        st.markdown("**Descriptive Statistics:**")
+        numeric_df = df.select_dtypes(include=[np.number])
+        desc_stats = numeric_df.describe().round(2)
+        st.dataframe(desc_stats, use_container_width=True)
+
+        # Distribution analysis
+        st.markdown("**Distribution Analysis:**")
+        selected_col = st.selectbox("Select column for distribution analysis",
+                                   numeric_df.columns.tolist(),
+                                   key="dist_col")
+
+        if selected_col:
+            col1, col2 = st.columns(2)
+
+            with col1:
+                fig_hist = px.histogram(df, x=selected_col, nbins=30,
+                                       title=f"Distribution of {selected_col}")
+                st.plotly_chart(fig_hist, use_container_width=True)
+
+            with col2:
+                sorted_data = df[[selected_col]].dropna().sort_values(by=selected_col)
+                fig_line = px.line(sorted_data.reset_index(drop=True), y=selected_col,
+                                   title=f"Sorted {selected_col} Trend",
+                                   labels={selected_col: selected_col, 'index': 'Rank'})
+                fig_line.add_hline(y=df[selected_col].mean(), line_dash="dash",
+                                   line_color="green", annotation_text="Mean",
+                                   annotation_position="top right")
+                fig_line.add_hline(y=df[selected_col].median(), line_dash="dot",
+                                   line_color="blue", annotation_text="Median",
+                                   annotation_position="bottom right")
+                st.plotly_chart(fig_line, use_container_width=True)
+
+            # Statistical tests
+            st.markdown(f"**Statistical Tests for {selected_col}:**")
+            test_cols = st.columns(4)
+            with test_cols[0]:
+                st.metric("Mean", f"{df[selected_col].mean():.2f}")
+            with test_cols[1]:
+                st.metric("Median", f"{df[selected_col].median():.2f}")
+            with test_cols[2]:
+                st.metric("Std Dev", f"{df[selected_col].std():.2f}")
+            with test_cols[3]:
+                st.metric("Skewness", f"{df[selected_col].skew():.2f}")
 
     else:
-        st.warning("No State/UT or City column found for crimes summary.")
+        st.warning("No numeric columns available for statistical analysis.")
 
-else:
-    # fallback for non-crime datasets (arrests)
-    total_candidates = [c for c in df.columns if 'Total Persons Arrested' in c and 'age and Sex' in c]
-    if total_candidates:
-        total_col = total_candidates[0]
-        total_arrests = int(df[total_col].sum()) if pd.api.types.is_numeric_dtype(df[total_col]) else 0
-        st.metric("Total persons arrested", f"{total_arrests:,}")
+# Tab 2: Correlation Analysis
+with analysis_tabs[1]:
+    st.markdown("### 🔗 Correlation Analysis")
 
-        if "City" in df.columns:
-            city_summary = df.groupby("City")[total_col].sum().sort_values(ascending=False)
-            st.subheader("Top 10 cities by total arrests")
-            st.bar_chart(city_summary.head(10))
+    numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
-        st.markdown("---")
+    if len(numeric_cols) >= 2:
+        # Correlation matrix
+        corr_matrix = df[numeric_cols].corr()
 
+        # Heatmap
+        fig_corr = px.imshow(corr_matrix,
+                           text_auto=True,
+                           aspect="auto",
+                           title="Correlation Matrix",
+                           color_continuous_scale="RdBu_r")
+        st.plotly_chart(fig_corr, use_container_width=True)
+
+        corr_pairs = []
+        for i in range(len(numeric_cols)):
+            for j in range(i+1, len(numeric_cols)):
+                corr_val = abs(corr_matrix.iloc[i, j])
+                corr_pairs.append((numeric_cols[i], numeric_cols[j], corr_val))
+
+        corr_pairs.sort(key=lambda x: x[2], reverse=True)
+
+    else:
+        st.warning("Need at least 2 numeric columns for correlation analysis.")
+
+# Tab 3: Custom Queries
+with analysis_tabs[2]:
+    st.markdown("### 🔍 Custom Data Queries")
+
+    st.markdown("""
+    <div style='background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 8px; font-family: Courier New, monospace; margin: 10px 0;'>
+    <strong>Available DataFrame:</strong> df<br>
+    <strong>Example queries:</strong><br>
+    • df[df['column'] > value]<br>
+    • df.groupby('column')['numeric_col'].mean()<br>
+    • df['column'].value_counts()<br>
+    • df.isnull().sum()
+    </div>
+    """, unsafe_allow_html=True)
+
+    query_type = st.selectbox("Query Type",
+                             ["Filter Rows", "Group By", "Value Counts", "Custom Expression"])
+
+    if query_type == "Filter Rows":
+        filter_col = st.selectbox("Column to filter", df.columns.tolist())
+        if df[filter_col].dtype in ['int64', 'float64']:
+            min_val, max_val = st.slider("Value range",
+                                       float(df[filter_col].min()),
+                                       float(df[filter_col].max()),
+                                       (float(df[filter_col].min()), float(df[filter_col].max())))
+            filtered_df = df[(df[filter_col] >= min_val) & (df[filter_col] <= max_val)]
+        else:
+            unique_vals = df[filter_col].unique()
+            selected_vals = st.multiselect("Select values", unique_vals)
+            if selected_vals:
+                filtered_df = df[df[filter_col].isin(selected_vals)]
+            else:
+                filtered_df = df
+
+        st.write(f"Filtered results: {len(filtered_df)} rows")
+        st.dataframe(filtered_df.head(20), use_container_width=True)
+
+    elif query_type == "Group By":
+        group_col = st.selectbox("Group by column", df.columns.tolist())
+        agg_col = st.selectbox("Aggregate column",
+                              df.select_dtypes(include=[np.number]).columns.tolist())
+        agg_func = st.selectbox("Aggregation function", ["mean", "sum", "count", "min", "max"])
+
+        if agg_func == "count":
+            result = df.groupby(group_col)[agg_col].count()
+        else:
+            result = getattr(df.groupby(group_col)[agg_col], agg_func)()
+
+        result_df = result.reset_index().sort_values(agg_col, ascending=False)
+        st.dataframe(result_df, use_container_width=True)
+
+        # Visualization
+        fig_group = px.bar(result_df.head(10), x=group_col, y=agg_col,
+                          title=f"Top 10 {agg_func.upper()} of {agg_col} by {group_col}")
+        st.plotly_chart(fig_group, use_container_width=True)
+
+    elif query_type == "Value Counts":
+        count_col = st.selectbox("Column for value counts", df.columns.tolist())
+        counts = df[count_col].value_counts().head(20)
+
+        st.dataframe(counts.reset_index(), use_container_width=True)
+
+        fig_counts = px.bar(counts, x=counts.index, y=counts.values,
+                           title=f"Value Distribution: {count_col}")
+        st.plotly_chart(fig_counts, use_container_width=True)
+
+    elif query_type == "Custom Expression":
+        st.markdown("**Enter a pandas expression:**")
+        st.code("Example: df[df['numeric_col'] > df['numeric_col'].mean()]")
+        custom_query = st.text_area("Custom pandas query", height=100)
+
+        if custom_query.strip():
+            try:
+                result = eval(custom_query)
+                if isinstance(result, pd.DataFrame):
+                    st.write(f"Result shape: {result.shape}")
+                    st.dataframe(result.head(20), use_container_width=True)
+                elif isinstance(result, pd.Series):
+                    st.write(f"Result length: {len(result)}")
+                    st.dataframe(result.head(20).reset_index(), use_container_width=True)
+                else:
+                    st.write(f"Result: {result}")
+            except Exception as e:
+                st.error(f"Query error: {e}")
+
+# -------- RAW DATA VIEW --------
 st.markdown("---")
-st.subheader("Dataset head")
-st.dataframe(df.head(20))
+st.markdown("### 📄 Raw Data Preview")
 
-if st.button("Back to Home"):
-    st.info("Use the sidebar to go back to Home or other pages.")
+# Filters for data view
+col1, col2 = st.columns(2)
+with col1:
+    show_rows = st.slider("Rows to display", 5, 50, 20)
+with col2:
+    if len(df.columns) > 10:
+        show_all_cols = st.checkbox("Show all columns", value=False)
+    else:
+        show_all_cols = True
+
+if show_all_cols:
+    st.dataframe(df.head(show_rows), use_container_width=True)
+else:
+    # Show only first 10 columns
+    st.dataframe(df.iloc[:show_rows, :10], use_container_width=True)
+    st.info("ℹ️ Showing first 10 columns only. Check 'Show all columns' to see everything.")
+
+# -------- DOWNLOAD OPTION --------
+st.markdown("---")
+st.markdown("### 💾 Export Data")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("📥 Download as CSV"):
+        csv_data = df.to_csv(index=False)
+        st.download_button(
+            label="Click to Download",
+            data=csv_data,
+            file_name=f"{selected_file}",
+            mime="text/csv"
+        )
+with col2:
+    if st.button("📊 Download Summary"):
+        summary = df.describe(include='all').to_csv()
+        st.download_button(
+            label="Click to Download",
+            data=summary,
+            file_name=f"{selected_file.replace('.csv', '')}_summary.csv",
+            mime="text/csv"
+        )
+
+# -------- NAVIGATION --------
+st.markdown("---")
+col1, col2, col3 = st.columns([1, 1, 1])
+with col1:
+    if st.button("🏠 Back to Home", use_container_width=True):
+        st.switch_page("pages/7_About.py")
+with col2:
+    if st.button("📊 Dashboard", use_container_width=True):
+        st.switch_page("pages/2_dashboard.py")
+with col3:
+    if st.button("💬 Global Chat", use_container_width=True):
+        st.switch_page("pages/6_GlobalChat.py")

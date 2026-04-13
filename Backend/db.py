@@ -21,9 +21,17 @@ def init_db():
                 username TEXT NOT NULL,
                 message TEXT NOT NULL,
                 location TEXT,
+                emergency INTEGER DEFAULT 0,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         """)
+        
+        # Add emergency column if it doesn't exist
+        try:
+            conn.execute("ALTER TABLE messages ADD COLUMN emergency INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
         conn.commit()
 
 def query_one(query, args=()):

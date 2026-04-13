@@ -3,13 +3,13 @@ from flask_cors import CORS
 from config import FLASK_DEBUG, FLASK_HOST, FLASK_PORT
 from db import init_db
 from routes.auth import auth_bp
-from routes.chat import chat_bp
+from routes.chat_routes import global_chat_bp
 
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.register_blueprint(auth_bp)
-    app.register_blueprint(chat_bp)
+    app.register_blueprint(global_chat_bp)
 
     @app.route("/api/health")
     def health():
