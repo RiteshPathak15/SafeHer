@@ -4,6 +4,10 @@ import requests
 import textwrap
 from datetime import datetime
 import time
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+from components import render_sidebar_header
 
 API_BASE = "http://127.0.0.1:5000/api"
 
@@ -266,6 +270,10 @@ def render_message(msg):
 
 # ---------- HEADER ----------
 st.title("💬 SafeHer Global Chat")
+
+# ---------- SIDEBAR WITH LOGOUT ----------
+with st.sidebar:
+    render_sidebar_header()
 
 # ---------- LAYOUT ----------
 chat_col, side_col = st.columns([3, 1])

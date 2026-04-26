@@ -1,4 +1,8 @@
 import streamlit as st
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+from components import render_sidebar_header
 
 st.set_page_config(page_title="SafeHer - About", layout="wide")
 
@@ -54,6 +58,10 @@ body, .main, .block-container {
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ---------- SIDEBAR WITH LOGOUT ----------
+with st.sidebar:
+    render_sidebar_header()
 
 st.markdown(
     """

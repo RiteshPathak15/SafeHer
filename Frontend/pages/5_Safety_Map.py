@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 from data.helplines import helplines
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+from components import render_sidebar_header, sidebar_filter_section
 
 st.set_page_config(page_title="SafeHer - Safety Map", layout="wide")
 
@@ -20,18 +23,30 @@ df = pd.read_csv(DATA_DIR / "dstrCAW_1.csv")
 crime_cols = ['Rape', 'Kidnapping and Abduction', 'Dowry Deaths', 'Assault on women with intent to outrage her modesty', 'Insult to modesty of Women', 'Cruelty by Husband or his Relatives', 'Importation of Girls']
 df['Total Crimes'] = df[crime_cols].sum(axis=1)
 
-# Sidebar filters
-st.sidebar.header("Filters")
-states = sorted(df['STATE/UT'].unique())
-selected_state = st.sidebar.selectbox("Select State/UT", states)
-
-years = sorted(df['Year'].unique())
-selected_year = st.sidebar.selectbox("Select Year", years, index=len(years)-1)
-
-crime_types = st.sidebar.multiselect("Select Crime Types", crime_cols, default=crime_cols)
+# Sidebar layout
+with st.sidebar:
+    render_sidebar_header()
+    sidebar_filter_section("🔍 Filters")
+    
+    # Sidebar filters
+    states = sorted(df['STATE/UT'].unique())
+    selected_state = st.selectbox("Select State/UT", ["🇮🇳 India (All States)"] + list(states))
+    
+    years = sorted(df['Year'].unique())
+    selected_year = st.selectbox("Select Year", ["All Years"] + list(years), index=len(years))
+    
+    crime_types = st.multiselect("Select Crime Types", crime_cols, default=crime_cols)
 
 # Filter data
-state_df = df[(df['STATE/UT'] == selected_state) & (df['Year'] == selected_year)]
+if selected_state == "🇮🇳 India (All States)":
+    state_df = df.copy()
+    state_name = "India"
+else:
+    state_df = df[df['STATE/UT'] == selected_state]
+    state_name = selected_state
+    
+if selected_year != "All Years":
+    state_df = state_df[state_df['Year'] == selected_year]
 if crime_types:
     state_df['Filtered Crimes'] = state_df[crime_types].sum(axis=1)
 else:
@@ -40,11 +55,12 @@ else:
 # Aggregate by district
 district_crimes = state_df.groupby('DISTRICT')['Filtered Crimes'].sum().reset_index().sort_values('Filtered Crimes', ascending=False)
 
-st.subheader(f"District Crime Summary in {selected_state} ({selected_year})")
+year_text = "All Years" if selected_year == "All Years" else f"({selected_year})"
+st.subheader(f"District Crime Summary in {state_name} {year_text}")
 
 # State total card
 total_crimes = district_crimes['Filtered Crimes'].sum()
-st.metric(label=f"Total Crimes in {selected_state}", value=f"{int(total_crimes):,}")
+st.metric(label=f"Total Crimes in {state_name}", value=f"{int(total_crimes):,}")
 
 # Display top districts as cards
 top_districts = district_crimes.head(5)
@@ -54,8 +70,10 @@ for i, (_, row) in enumerate(top_districts.iterrows()):
         st.metric(label=row['DISTRICT'], value=f"{int(row['Filtered Crimes']):,}")
 
 # Choropleth map for states (India level)
-st.subheader(f"India State Crime Intensity Map ({selected_year})")
-year_df = df[df['Year'] == selected_year]
+map_year_text = "All Years" if selected_year == "All Years" else str(selected_year)
+st.subheader(f"India State Crime Intensity Map ({map_year_text})")
+
+year_df = df if selected_year == "All Years" else df[df['Year'] == selected_year]
 if crime_types:
     year_df['Filtered Crimes'] = year_df[crime_types].sum(axis=1)
 else:
@@ -106,7 +124,7 @@ fig_map = px.choropleth(state_totals, geojson="https://raw.githubusercontent.com
                         featureidkey='properties.NAME_1',
                         locations='State', color='Filtered Crimes',
                         color_continuous_scale='Reds',
-                        title=f"Crime Intensity by State in India ({selected_year})",
+                        title=f"Crime Intensity by State in India ({map_year_text})",
                         hover_name='State', hover_data=['Filtered Crimes'],
                         projection="mercator")
 fig_map.update_geos(fitbounds="locations", visible=False, center=dict(lat=20.5937, lon=78.9629), scope="asia")

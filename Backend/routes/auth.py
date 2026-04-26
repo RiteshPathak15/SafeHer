@@ -39,3 +39,20 @@ def login():
     if user and check_password_hash(user["password_hash"], password):
         return jsonify({"success": True, "name": user["name"], "username": user["username"]})
     return jsonify({"error": "Invalid credentials"}), 401
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    """
+    Logout endpoint for client-side session termination.
+    In Streamlit, logout is primarily handled client-side by clearing session state.
+    This endpoint can be used for backend logging/cleanup if needed.
+    """
+    try:
+        username = request.json.get("username") if request.json else None
+        # Optional: Log the logout event in the backend
+        if username:
+            # You can add logging here if needed
+            pass
+        return jsonify({"success": True, "message": "Logged out successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

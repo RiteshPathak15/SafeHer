@@ -4,6 +4,9 @@ import numpy as np
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+from components import render_sidebar_header
 
 st.set_page_config(page_title="SafeHer - Data Science Lab", layout="wide", page_icon="🔬")
 
@@ -54,6 +57,10 @@ st.markdown("""
 # -------- HEADER --------
 st.title("� SafeHer Data Science Lab")
 st.markdown("**Advanced Analytics & Research Tools for Women's Safety Data**")
+
+# -------- SIDEBAR HEADER --------
+with st.sidebar:
+    render_sidebar_header()
 
 # -------- DATA DIRECTORY --------
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"

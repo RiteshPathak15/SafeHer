@@ -3,6 +3,9 @@ import pandas as pd
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+from components import render_sidebar_header, sidebar_filter_section
 
 st.set_page_config(page_title="SafeHer - Dashboard", layout="wide")
 
@@ -92,7 +95,8 @@ st.markdown(f"**Dataset:** {selected_display} | **Rows:** {len(df):,} | **Column
 # Sidebar filters
 df_filtered = df.copy()
 with st.sidebar:
-    st.header("🔍 Filters")
+    render_sidebar_header()
+    sidebar_filter_section()
     
     year_cols = [c for c in df.columns if 'Year' in c or c == 'Year']
     selected_year = None
