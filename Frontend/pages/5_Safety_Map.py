@@ -17,7 +17,7 @@ st.title("🗺️ Safety Map - Crime Intensity by State/District")
 
 # Load data
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-df = pd.read_csv(DATA_DIR / "dstrCAW_1.csv")
+df = pd.read_csv(DATA_DIR / "District-Level Crime Against Women.csv")
 
 # Calculate total crimes per row
 crime_cols = ['Rape', 'Kidnapping and Abduction', 'Dowry Deaths', 'Assault on women with intent to outrage her modesty', 'Insult to modesty of Women', 'Cruelty by Husband or his Relatives', 'Importation of Girls']
@@ -133,6 +133,38 @@ st.plotly_chart(fig_map, use_container_width=True)
 
 # Color legend
 st.markdown("**Color Legend:** Red indicates higher crime intensity, lighter colors lower.")
+
+
+# Show district-level visualization only when a state is selected
+# Show district-level visualization only when a state is selected
+if selected_state != "🇮🇳 India (All States)":
+
+    st.subheader(f"📊 District-wise Crime Analysis in {state_name}")
+
+    # ❌ Remove TOTAL row
+    district_crimes = district_crimes[district_crimes['DISTRICT'] != 'TOTAL']
+
+    # Sort districts
+    district_sorted = district_crimes.sort_values("Filtered Crimes", ascending=False)
+
+    # 🎯 Top 10 districts bar chart
+    fig_bar = px.bar(
+        district_sorted.head(10),
+        x="Filtered Crimes",
+        y="DISTRICT",
+        orientation="h",
+        color="Filtered Crimes",
+        color_continuous_scale="Reds",
+        title=f"Top 10 High Crime Districts in {state_name}"
+    )
+
+    fig_bar.update_layout(
+        yaxis=dict(autorange="reversed"),
+        height=500,
+        margin=dict(l=0, r=0, t=40, b=0)
+    )
+
+    st.plotly_chart(fig_bar, use_container_width=True)
 
 # Helpline section
 st.subheader("🚨 Emergency Helplines & Protection Resources")

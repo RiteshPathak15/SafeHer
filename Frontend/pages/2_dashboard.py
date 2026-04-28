@@ -16,10 +16,9 @@ if "logged_in" not in st.session_state or not st.session_state.logged_in:
 
 # -------- DATASET NAME MAPPING --------
 DATASET_NAMES = {
-    "dstrCAW_1.csv": "📍 Crime Against Women by District & Year",
+    "District-Level Crime Against Women.csv": "📍 Crime Against Women by District & Year",
     "dstrCAW.csv": "📍 Crime Against Women (District Level)",
     "CAW_TCI_2018.csv": "📈 Crime Against Women - Trend & Case Index",
-    "NCRB CII-2020 Table.No-19B.2.csv": "📊 Crime Against Women (State Level)",
 }
 
 def get_display_name(filename):

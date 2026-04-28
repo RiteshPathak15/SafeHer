@@ -148,6 +148,21 @@ def generate_username():
     digits = ''.join(random.choice(string.digits) for _ in range(4))
     return f"user{letters}{digits}"
 
+def validate_full_name(name):
+    """Validate that full name contains only letters and spaces."""
+    if not name:
+        return False, "Full name is required"
+    
+    # Check if name contains only letters and spaces
+    if not all(char.isalpha() or char.isspace() for char in name):
+        return False, "Full name should contain only letters (no numbers, special characters, or keywords allowed)"
+    
+    # Check if name has at least one letter
+    if not any(char.isalpha() for char in name):
+        return False, "Full name must contain at least one letter"
+    
+    return True, "Valid"
+
 # ---------- UI ----------
 st.title("SafeHer Registration")
 st.markdown('<p style="text-align:center; color:#aaa; font-size:14px;">Create your account to join SafeHer</p>', unsafe_allow_html=True)
@@ -155,26 +170,23 @@ st.markdown('<p style="text-align:center; color:#aaa; font-size:14px;">Create yo
 with st.form("register_form"):
     full_name = st.text_input("Full Name")
     
-    # Show auto-generated username preview
-    auto_username = generate_username()
-    username_requested = st.text_input(
-        "Username (leave blank for auto-generated)",
-        placeholder=f"Auto: {auto_username}"
-    )
-    
     password = st.text_input("Password", type="password")
     confirm_password = st.text_input("Confirm Password", type="password")
     submit = st.form_submit_button("REGISTER")
 
 # ---------- LOGIC ----------
 if submit:
-    if not full_name or not password or not confirm_password:
-        st.error("Enter name and password")
+    # Validate full name
+    is_valid, validation_msg = validate_full_name(full_name)
+    if not is_valid:
+        st.error(validation_msg)
+    elif not password or not confirm_password:
+        st.error("Enter password and confirm password")
     elif password != confirm_password:
         st.error("Passwords do not match")
     else:
-        # Use provided username or auto-generate
-        final_username = username_requested.strip() if username_requested.strip() else generate_username()
+        # Auto-generate username
+        final_username = generate_username()
 
         payload = {"name": full_name, "username": final_username, "password": password}
         try:

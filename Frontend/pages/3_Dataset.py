@@ -75,17 +75,11 @@ if not csv_files:
 
 # Dataset descriptions
 DATASET_INFO = {
-    "dstrCAW_1.csv": {
+    "District-Level Crime Against Women.csv": {
         "name": "📍 District-Level Crime Against Women",
         "description": "Comprehensive district-wise crime statistics across India",
         "type": "crime",
         "columns": ["District", "State/UT", "Year", "Rape", "Kidnapping", "Dowry Deaths", "Cruelty"]
-    },
-    "NCRB_CII-2020_Table.No-19B.2.csv": {
-        "name": "📊 NCRB Crime Index (State Level)",
-        "description": "National Crime Records Bureau crime index data by state",
-        "type": "crime_index",
-        "columns": ["State/UT", "Crime Index", "Population", "Rate per lakh"]
     }
 }
 
