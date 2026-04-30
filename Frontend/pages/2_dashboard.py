@@ -6,8 +6,12 @@ import plotly.graph_objects as go
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header, sidebar_filter_section
+from theme import apply_global_theme
 
-st.set_page_config(page_title="SafeHer - Dashboard", layout="wide")
+st.set_page_config(page_title="Rakshika-Ai- Dashboard", layout="wide")
+
+# Apply global theme
+apply_global_theme()
 
 # -------- AUTH CHECK --------
 if "logged_in" not in st.session_state or not st.session_state.logged_in:
@@ -35,36 +39,6 @@ def get_display_name(filename):
     # Fallback: clean up the filename
     return filename.replace("_", " ").replace(".csv", "")
 
-# -------- STYLING --------
-st.markdown("""
-<style>
-.metric-card {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 20px;
-    border-radius: 12px;
-    color: white;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-.metric-value {
-    font-size: 28px;
-    font-weight: bold;
-    margin: 10px 0;
-}
-.metric-label {
-    font-size: 14px;
-    opacity: 0.9;
-}
-.chart-container {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-}
-</style>
-""", unsafe_allow_html=True)
-
 # -------- DATA LOADING --------
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 if not DATA_DIR.exists():
@@ -88,7 +62,7 @@ except Exception as err:
     st.stop()
 
 # -------- TITLE & FILTERS --------
-st.title("📊 SafeHer Data Analytics Dashboard")
+st.title("Rakshika-Ai Data Analytics Dashboard")
 st.markdown(f"**Dataset:** {selected_display} | **Rows:** {len(df):,} | **Columns:** {len(df.columns)}")
 
 # Sidebar filters

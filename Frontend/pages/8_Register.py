@@ -2,138 +2,16 @@ import streamlit as st
 import random
 import string
 import requests
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+from theme import apply_global_theme, auth_page_setup
 
 st.set_page_config(page_title="SafeHer - Register", layout="centered")
 
-# ---------- CSS ----------
-st.markdown("""
-<style>
-
-/* Background */
-.stApp {
-    background: linear-gradient(90deg, #1f2a38, #0a0f1a);
-}
-
-/* Main container becomes card */
-.block-container {
-    max-width: 500px;
-    margin-top: 60px;
-    padding: 40px;
-    border-radius: 10px;
-    background: rgba(11, 22, 34, 0.9);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Title */
-h1 {
-    text-align: center;
-    color: white;
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-/* Subtitle */
-.stMarkdown {
-    color: #aaa !important;
-    text-align: center;
-}
-
-/* Labels */
-label {
-    color: #bbb !important;
-}
-
-/* INPUT STYLE (underline only) */
-.stTextInput > div > div {
-    position: relative;
-}
-
-.stTextInput > div > div > input {
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 1px solid #555 !important;
-    border-radius: 0 !important;
-    color: white !important;
-    padding-right: 40px !important;
-}
-
-/* Focus effect */
-.stTextInput > div > div > input:focus {
-    border-bottom: 1px solid #00f5d4 !important;
-    box-shadow: none !important;
-}
-
-/* Password eye button */
-.stTextInput > div > div > button {
-    position: absolute !important;
-    right: 6px !important;
-    transform: translateY(-50%) !important;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    border: none !important;
-    background: rgba(0, 245, 212, 0.12) !important;
-    border-radius: 50% !important;
-    color: #00f5d4 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: hidden !important;
-}
-
-.stTextInput > div > div > button:hover {
-    background: rgba(0, 245, 212, 0.24) !important;
-}
-
-.stTextInput > div > div > button svg {
-    width: 18px !important;
-    height: 18px !important;
-    stroke: #00f5d4 !important;
-    fill: none !important;
-}
-
-.stTextInput > div > div > button span {
-    display: none !important;
-}
-
-/* Remove default box safely */
-[data-baseweb="input"] {
-    background: transparent !important;
-    border: none !important;
-}
-
-/* Button */
-.stForm button {
-    background: transparent;
-    color: #00f5d4;
-    border: 1px solid rgba(0,245,212,0.5);
-    padding: 10px 22px;
-    border-radius: 6px;
-    margin-top: 20px;
-    position: relative;
-}
-
-/* Button hover */
-.stForm button:hover {
-    background: rgba(0,245,212,0.08);
-    border-left: 3px solid #00f5d4;
-    border-bottom: 3px solid #00f5d4;
-}
-
-/* Corner effect */
-.stForm button::before {
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    left: 6px;
-    bottom: 6px;
-}
-
-</style>
-""", unsafe_allow_html=True)
+# Apply theme
+auth_page_setup("Register")
+apply_global_theme()
 
 
 if "users" not in st.session_state:

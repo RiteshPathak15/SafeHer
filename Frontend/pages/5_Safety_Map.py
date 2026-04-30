@@ -6,8 +6,12 @@ from data.helplines import helplines
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header, sidebar_filter_section
+from theme import apply_global_theme
 
-st.set_page_config(page_title="SafeHer - Safety Map", layout="wide")
+st.set_page_config(page_title="Rakshika-Ai- Safety Map", layout="wide")
+
+# Apply global theme
+apply_global_theme()
 
 if "logged_in" not in st.session_state or not st.session_state.logged_in:
     st.warning("Please login first")
@@ -127,8 +131,31 @@ fig_map = px.choropleth(state_totals, geojson="https://raw.githubusercontent.com
                         title=f"Crime Intensity by State in India ({map_year_text})",
                         hover_name='State', hover_data=['Filtered Crimes'],
                         projection="mercator")
-fig_map.update_geos(fitbounds="locations", visible=False, center=dict(lat=20.5937, lon=78.9629), scope="asia")
-fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+# Custom hover template
+fig_map.update_traces(
+    hovertemplate='<b>%{hovertext}</b><br>' +
+                  'Total Crimes: %{customdata[0]:,.0f}<br>' +
+                  '<extra></extra>',
+    customdata=state_totals[['Filtered Crimes']].values
+)
+
+fig_map.update_geos(
+    fitbounds="locations", 
+    visible=False, 
+    center=dict(lat=20.5937, lon=78.9629), 
+    scope="asia"
+)
+
+fig_map.update_layout(
+    margin=dict(l=10, r=10, t=50, b=10),
+    height=600,
+    hoverlabel=dict(
+        bgcolor="white",
+        font_size=13,
+        font_family="Arial"
+    )
+)
 st.plotly_chart(fig_map, use_container_width=True)
 
 # Color legend
@@ -196,7 +223,7 @@ with st.expander("🛡️ Personal Safety Tips", expanded=True):
     **Daily Safety Practices:**
     - Stay in well-lit and populated areas, especially at night
     - Share your live location with trusted family/friends via apps
-    - Use safety apps like SafeHer or emergency SOS features on your phone
+    - Use safety apps like Rakshika-Ai or emergency SOS features on your phone
     - Know the locations of nearby police stations and hospitals
     - Report any suspicious activity immediately to authorities
     - Carry personal alarms or pepper spray if legal in your area

@@ -7,55 +7,20 @@ import plotly.graph_objects as go
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header
+from theme import apply_global_theme
 
-st.set_page_config(page_title="SafeHer - Data Science Lab", layout="wide", page_icon="🔬")
+st.set_page_config(page_title="Rakshika-Ai- Data Science Lab", layout="wide", page_icon="🔬")
+
+# Apply global theme
+apply_global_theme()
 
 # -------- AUTH CHECK --------
 if "logged_in" not in st.session_state or not st.session_state.logged_in:
     st.warning("Please login first in Login page")
     st.stop()
 
-# -------- STYLING --------
-st.markdown("""
-<style>
-.dataset-card {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 20px;
-    border-radius: 12px;
-    color: white;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-.dataset-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-.dataset-desc {
-    font-size: 14px;
-    opacity: 0.9;
-}
-.insight-card {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    margin-bottom: 15px;
-}
-.emergency-banner {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 20px 0;
-}
-</style>
-""", unsafe_allow_html=True)
-
 # -------- HEADER --------
-st.title("� SafeHer Data Science Lab")
+st.title("Rakshika-Ai Data Science Lab")
 st.markdown("**Advanced Analytics & Research Tools for Women's Safety Data**")
 
 # -------- SIDEBAR HEADER --------

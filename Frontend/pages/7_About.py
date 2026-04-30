@@ -3,61 +3,12 @@ from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header
+from theme import apply_global_theme
 
 st.set_page_config(page_title="SafeHer - About", layout="wide")
 
-st.markdown("""
-<style>
-body, .main, .block-container {
-  background-color: #020617 !important;
-  color: #e2e8f0 !important;
-}
-.page-title {
-  color: #f8fafc;
-}
-.hero-box {
-  background: linear-gradient(180deg, rgba(30,58,138,0.95), rgba(15,23,42,0.95));
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
-}
-.card {
-  background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 18px;
-  padding: 24px;
-  margin-bottom: 22px;
-}
-.card h3 {
-  color: #f8fafc;
-}
-.card p, .card li {
-  color: #cbd5e1;
-}
-.badge {
-  display: inline-block;
-  background: #2563eb;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  margin-right: 8px;
-  margin-bottom: 10px;
-}
-.feature-icon {
-  font-size: 2rem;
-  margin-right: 14px;
-}
-.feature-box {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 16px;
-}
-</style>
-""", unsafe_allow_html=True)
+# Apply global theme
+apply_global_theme()
 
 # ---------- SIDEBAR WITH LOGOUT ----------
 with st.sidebar:

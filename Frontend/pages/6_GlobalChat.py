@@ -1,54 +1,43 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import requests
-import textwrap
 from datetime import datetime
 import time
 from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header
+from theme import apply_global_theme
 
 API_BASE = "http://127.0.0.1:5000/api"
 
-st.set_page_config(page_title="SafeHer Global Chat", layout="wide")
+st.set_page_config(page_title="Rakshika-Ai Global Chat", layout="wide")
 
-# ---------- STYLING ----------
+# Apply global theme
+apply_global_theme()
+
+# ---------- CHAT-SPECIFIC STYLING ----------
 st.markdown("""
 <style>
-
-/* ---------- GLOBAL ---------- */
-body {
-    background: linear-gradient(135deg, #e5ddd5, #d1dbe6);
-    font-family: 'Segoe UI', sans-serif;
-}
-
-/* ---------- CHAT CONTAINER ---------- */
+/* ===== CHAT CONTAINER ===== */
 .chat-container {
-    max-height: 520px;
-    overflow-y: auto;
-    padding: 18px 14px 10px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    scroll-behavior: smooth;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+    border-radius: 16px;
+    max-height: 600px;
+    overflow-y: auto;
 }
 
-/* Scrollbar */
-.chat-container::-webkit-scrollbar {
-    width: 6px;
-}
-.chat-container::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.2);
-    border-radius: 999px;
-}
-
-/* ---------- CHAT ROW ---------- */
+/* ===== CHAT ROW ===== */
 .chat-row {
     display: flex;
     align-items: flex-end;
     gap: 10px;
-    animation: fadeIn 0.25s ease-in-out;
+    margin-bottom: 8px;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .chat-row.own {
@@ -59,114 +48,159 @@ body {
     justify-content: flex-start;
 }
 
-/* ✅ NEW: CENTER EMERGENCY */
 .chat-row.emergency-center {
     justify-content: center !important;
 }
 
-/* ---------- AVATAR ---------- */
+/* ===== AVATAR ===== */
 .avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #34b7f1, #0ea5e9);
+    background: linear-gradient(135deg, #6B46C1, #8B5CF6);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.85rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(107, 70, 193, 0.25);
+    flex-shrink: 0;
 }
 
 .avatar.own {
-    background: linear-gradient(135deg, #25d366, #16a34a);
+    background: linear-gradient(135deg, #10B981, #34D399);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
-/* ---------- CHAT BUBBLE ---------- */
+/* ===== CHAT BUBBLE ===== */
 .chat-bubble {
-    width: fit-content;
-    max-width: 60%;
-    min-width: 120px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    max-width: 70%;
+    min-width: 80px;
+    padding: 14px 16px;
+    border-radius: 18px;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    transition: transform 0.1s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    word-wrap: break-word;
+    animation: slideInUp 0.3s ease-out;
 }
 
-.chat-bubble:hover {
-    transform: scale(1.01);
-}
-
-/* Own */
+/* Own Message - Green (WhatsApp style) */
 .chat-bubble.own {
-    background: #dcf8c6;
-    border-bottom-right-radius: 6px;
+    background: linear-gradient(135deg, #6B46C1, #8B5CF6);
+    color: white;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
 }
 
-/* Other */
+/* Other Message - White */
 .chat-bubble.other {
-    background: #ffffff;
-    border-bottom-left-radius: 6px;
+    background: white;
+    color: #111827;
+    border-bottom-left-radius: 4px;
+    margin-right: auto;
+    border: 1px solid rgba(107, 70, 193, 0.1);
 }
 
-/* ---------- TEXT ---------- */
-.chat-bubble .username {
-    font-size: 0.78rem;
-    color: #6b7280;
+/* Emergency Message - Red */
+.chat-bubble.chat-emergency {
+    background: linear-gradient(135deg, #DC2626, #EF4444);
+    color: white;
+    border-radius: 18px;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25);
     font-weight: 600;
 }
 
-.chat-bubble.own .username {
-    color: #15803d;
+/* ===== USERNAME ===== */
+.chat-bubble .username {
+    font-size: 0.8rem;
+    font-weight: 700;
+    opacity: 0.9;
+    letter-spacing: 0.3px;
 }
 
+.chat-bubble.own .username {
+    opacity: 0.95;
+}
+
+.chat-bubble.other .username {
+    color: #6B46C1;
+}
+
+/* ===== CHAT TEXT ===== */
 .chat-text {
     font-size: 0.95rem;
-    line-height: 1.4;
-    color: #111827;
+    line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
+    font-weight: 500;
 }
 
-/* ---------- META ---------- */
+/* ===== META ROW (Time & Location) ===== */
 .meta-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.72rem;
-    color: #6b7280;
+    font-size: 0.75rem;
+    opacity: 0.85;
+    margin-top: 4px;
+    font-weight: 500;
 }
 
-/* ---------- EMERGENCY ---------- */
-.chat-emergency {
-    background: linear-gradient(135deg, #ffe3e3, #ffb4b4);
-    border-left: 5px solid #ff1e1e;
-    color: #991b1b;
-    animation: pulse 1.5s infinite;
+.chat-bubble.own .meta-row {
+    opacity: 0.9;
 }
 
-/* ---------- SIDEBAR ---------- */
+/* ===== SIDEBAR BOX ===== */
 .sidebar-box {
-    padding: 18px;
-    border-radius: 18px;
-    background: #ffffff;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 24px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #F9FAFB, #F3F4F6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(107, 70, 193, 0.1);
 }
 
-/* ---------- BUTTON IMPROVEMENT ---------- */
-button[kind="primary"] {
-    border-radius: 10px !important;
+.sidebar-box h3 {
+    color: #111827;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+}
+
+/* ===== INPUT STYLING ===== */
+.stTextArea textarea {
+    background: white !important;
+    border: 2px solid #E5E7EB !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    font-size: 0.95rem !important;
+    resize: none !important;
+}
+
+.stTextArea textarea:focus {
+    border-color: #6B46C1 !important;
+    box-shadow: 0 0 0 4px rgba(107, 70, 193, 0.1) !important;
+}
+
+/* ===== TOGGLE STYLING ===== */
+.stCheckbox label {
     font-weight: 600 !important;
+    font-size: 0.95rem !important;
 }
 
-/* ---------- ANIMATIONS ---------- */
-@keyframes fadeIn {
+/* ===== BUTTON IMPROVEMENT ===== */
+.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    width: 100%;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideInUp {
     from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -174,12 +208,36 @@ button[kind="primary"] {
     }
 }
 
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255,0,0,0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(255,0,0,0); }
-    100% { box-shadow: 0 0 0 0 rgba(255,0,0,0); }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .chat-bubble {
+        max-width: 85%;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-box {
+        padding: 16px;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -239,37 +297,39 @@ def render_message(msg):
     is_emergency = msg.get("emergency")
     user_initials = "".join([part[0] for part in msg.get("username", "?").split()][:2]).upper()
 
-    # ✅ CENTER EMERGENCY
+    # Determine styles
     if is_emergency:
         row_class = "chat-row emergency-center"
-    else:
-        row_class = "chat-row own" if is_me else "chat-row other"
-
-    bubble_class = "chat-bubble own" if is_me else "chat-bubble other"
-    if is_emergency:
         bubble_class = "chat-bubble chat-emergency"
+        show_avatar = False
+    elif is_me:
+        row_class = "chat-row own"
+        bubble_class = "chat-bubble own"
+        show_avatar = True
+        avatar_position = "after"
+    else:
+        row_class = "chat-row other"
+        bubble_class = "chat-bubble other"
+        show_avatar = True
+        avatar_position = "before"
 
     location_text = f"📍 {msg['location']}" if msg.get("location") else ""
+    timestamp = format_time(msg.get('timestamp', ''))
 
-    html = textwrap.dedent(f"""
-    <div class="{row_class}">
-        {'' if is_me or is_emergency else f'<div class="avatar">{user_initials}</div>'}
-        <div class="{bubble_class}">
-            <div class="username">{msg.get('username')}</div>
-            <div class="chat-text">{msg.get('message')}</div>
-            <div class="meta-row">
-                <span>{location_text}</span>
-                <span>🕒 {format_time(msg.get('timestamp',''))}</span>
-            </div>
-        </div>
-        {'' if not is_me or is_emergency else f'<div class="avatar own">{user_initials}</div>'}
-    </div>
-    """)
-    html = "".join(line.strip() for line in html.splitlines())
+    # Build HTML
+    if show_avatar:
+        if avatar_position == "before":
+            html = f'<div class="{row_class}"><div class="avatar">{user_initials}</div><div class="{bubble_class}"><div class="username">{msg.get("username")}</div><div class="chat-text">{msg.get("message")}</div><div class="meta-row"><span>{location_text}</span><span>🕒 {timestamp}</span></div></div></div>'
+        else:
+            html = f'<div class="{row_class}"><div class="{bubble_class}"><div class="username">{msg.get("username")}</div><div class="chat-text">{msg.get("message")}</div><div class="meta-row"><span>{location_text}</span><span>🕒 {timestamp}</span></div></div><div class="avatar own">{user_initials}</div></div>'
+    else:
+        html = f'<div class="{row_class}"><div class="{bubble_class}"><div class="username">{msg.get("username")}</div><div class="chat-text">{msg.get("message")}</div><div class="meta-row"><span>{location_text}</span><span>🕒 {timestamp}</span></div></div></div>'
+
     st.markdown(html, unsafe_allow_html=True)
 
 # ---------- HEADER ----------
-st.title("💬 SafeHer Global Chat")
+st.title("💬 Rakshika-Ai Global Chat")
+st.markdown("**Connect safely with the community • Real-time chat & support**")
 
 # ---------- SIDEBAR WITH LOGOUT ----------
 with st.sidebar:
@@ -280,25 +340,41 @@ chat_col, side_col = st.columns([3, 1])
 
 # ---------- CHAT ----------
 with chat_col:
-    if st.button("🔄 Refresh"):
-        st.cache_data.clear()
-        st.rerun()
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("🔄 Refresh Messages", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+    
+    with col2:
+        if st.button("🗑️ Clear Cache", use_container_width=True):
+            st.cache_data.clear()
+            st.info("Cache cleared!")
 
     messages = fetch_messages()
 
+    # Display chat
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    
     if not messages:
-        st.info("No messages yet")
+        st.markdown("""
+        <div style="text-align: center; padding: 40px 20px; color: #6B7280;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">💬</div>
+            <h3 style="color: #111827;">No messages yet</h3>
+            <p>Be the first to send a message in this safe space!</p>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for m in messages:
             render_message(m)
-        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- SIDEBAR ----------
 with side_col:
     st.markdown('<div class="sidebar-box">', unsafe_allow_html=True)
 
-    st.subheader("Send Message")
+    st.subheader("✍️ Send Message")
 
     share_location = st.toggle("📍 Share Location", value=st.session_state.share_location)
 
@@ -307,59 +383,71 @@ with side_col:
         components.html("""
         <div>
             <button onclick="getLocation()" style="
-                padding:10px 14px;
-                background:#3b82f6;
-                color:white;
-                border:none;
-                border-radius:10px;
-                cursor:pointer;
-            ">
+                padding: 12px 16px;
+                background: linear-gradient(135deg, #6B46C1, #8B5CF6);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-weight: 600;
+                width: 100%;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(107, 70, 193, 0.3)';" 
+               onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
                 📍 Detect Location
             </button>
 
-            <p id="status" style="margin-top:8px;font-size:13px;color:gray;"></p>
+            <p id="status" style="margin-top: 12px; font-size: 13px; color: #6B7280; text-align: center;"></p>
         </div>
 
         <script>
         function getLocation() {
             const status = document.getElementById("status");
-            status.innerText = "Fetching location...";
+            status.innerText = "🔍 Fetching location...";
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const lat = pos.coords.latitude.toFixed(5);
                     const lon = pos.coords.longitude.toFixed(5);
 
-                    status.innerHTML = "Captured: " + lat + ", " + lon;
+                    status.innerHTML = "✅ Captured: " + lat + ", " + lon;
 
                     setTimeout(() => {
                         window.top.location.href = '?geo=' + lat + ',' + lon;
                     }, 800);
                 },
                 (err) => {
-                    status.innerText = "Permission denied or failed.";
+                    status.innerText = "❌ Permission denied or failed.";
+                    status.style.color = '#DC2626';
                 }
             );
         }
         </script>
-        """, height=120)
+        """, height=140)
 
         if st.session_state.location:
             try:
                 lat, lon = st.session_state.location.split(",")
-                st.success(f"📍 Location: {lat}, {lon}")
-                st.caption("This location will be attached to your message.")
+                st.success(f"✅ Location: {lat}, {lon}")
+                st.caption("📌 This location will be attached to your message.")
             except:
-                st.warning("Invalid location format")
+                st.warning("⚠️ Invalid location format")
 
-        manual = st.text_input("Enter manually (lat,lon)")
+        st.divider()
+        
+        manual = st.text_input("📍 Or enter manually (lat,lon)", placeholder="e.g. 28.6139, 77.2090")
         if manual:
             st.session_state.location = manual
 
-    emergency = st.toggle("🚨 Emergency")
-    msg = st.text_area("Message", height=120)
+    st.divider()
+    
+    emergency = st.toggle("🚨 Mark as Emergency", value=False)
+    if emergency:
+        st.warning("⚠️ This message will be highlighted as an emergency alert!")
+    
+    msg = st.text_area("💬 Your message", height=100, placeholder="Type your message here...", key="chat_input")
 
-    if st.button("Send", use_container_width=True):
+    if st.button("📤 Send Message", use_container_width=True, type="primary"):
         if msg.strip():
             payload = {
                 "username": username,
@@ -371,13 +459,13 @@ with side_col:
                 payload["location"] = st.session_state.location
 
             if send_message(payload):
-                st.toast("Message sent")
+                st.success("✅ Message sent!", icon="✔️")
                 st.cache_data.clear()
-                time.sleep(0.3)
+                time.sleep(0.5)
                 st.rerun()
             else:
-                st.error("Failed to send")
+                st.error("❌ Failed to send message. Please try again.", icon="⚠️")
         else:
-            st.warning("Enter a message")
+            st.warning("⚠️ Please enter a message", icon="⚠️")
 
     st.markdown('</div>', unsafe_allow_html=True)
