@@ -3,6 +3,8 @@ Rakshika-Ai Theme Module - Centralized CSS Styling for Women's Safety Applicatio
 A professional, empowering theme reflecting safety, trust, and support.
 """
 
+from turtle import right
+
 import streamlit as st
 
 # ========== COLOR PALETTE ==========
@@ -112,6 +114,18 @@ def apply_global_theme():
         backdrop-filter: blur(10px);
         border: 1px solid rgba(107, 70, 193, 0.05);
     }}
+    /* FIX Plotly hover issues */
+.js-plotly-plot *{{
+    transition: none !important;
+}}
+
+.js-plotly-plot .hoverlayer {{
+    pointer-events: none;
+}}
+
+.js-plotly-plot .hovertext {{
+    overflow: visible !important;
+}}
     
     /* ===== HEADERS ===== */
     h1, h2, h3, h4, h5, h6 {{
@@ -313,6 +327,76 @@ def apply_global_theme():
         background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
         transition: all 0.4s ease;
     }}
+
+    .metric-card.compact {{
+        padding: 16px;
+        border-radius: 14px;
+        box-shadow: 0 10px 22px rgba(107, 70, 193, 0.18);
+        min-height: 0;
+    }}
+
+    .metric-card.compact .metric-value {{
+        font-size: 1.8rem;
+    }}
+
+    .metric-card.compact .metric-label {{
+        font-size: 0.95rem;
+    }}
+
+    .metric-card.compact div[style] {{
+        font-size: 1.4rem !important;
+        margin-bottom: 8px !important;
+    }}
+
+    .dataset-card.compact {{
+        padding: 12px;
+        border-radius: 16px;
+        min-height: auto;
+    }}
+
+    .dataset-card.compact .dataset-title {{
+        font-size: 1rem;
+    }}
+
+    .dataset-card.compact .dataset-desc {{
+        font-size: 0.9rem;
+    }}
+
+    .safety-card {{
+        background: {COLORS['text_white']};
+        border: 1px solid rgba(107, 70, 193, 0.12);
+        border-radius: 14px;
+        padding: 14px 16px;
+        color: {COLORS['text_dark']};
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+        min-height: 0;
+        text-align: left;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }}
+
+    .safety-card:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    }}
+
+    .safety-card .card-title {{
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: {COLORS['primary_dark']};
+    }}
+
+    .safety-card .card-value {{
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 4px 0 6px;
+    }}
+
+    .safety-card .card-subtitle {{
+        font-size: 0.82rem;
+        color: {COLORS['text_light']};
+        opacity: 0.9;
+    }}
     
     .metric-card:hover {{
         transform: translateY(-8px) scale(1.02);
@@ -332,6 +416,139 @@ def apply_global_theme():
         font-weight: 600;
         letter-spacing: 0.5px;
     }}
+
+    .dataset-card {{
+        background: linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(255, 255, 255, 0.95));
+        border: 1px solid rgba(107, 70, 193, 0.15);
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 18px;
+        color: {COLORS['text_dark']};
+        box-shadow: 0 18px 40px rgba(107, 70, 193, 0.12);
+        transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }}
+
+    .dataset-card:hover {{
+        transform: translateY(-6px);
+        border-color: rgba(107, 70, 193, 0.3);
+        box-shadow: 0 24px 52px rgba(107, 70, 193, 0.18);
+    }}
+
+    .dataset-card .dataset-title {{
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: {COLORS['primary_dark']};
+        margin-bottom: 10px;
+    }}
+
+    .dataset-card .dataset-desc {{
+        color: {COLORS['text_light']};
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }}
+
+    .hero-box {{
+        background: linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(255, 255, 255, 0.95));
+        border: 1px solid rgba(107, 70, 193, 0.18);
+        border-radius: 24px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 18px 40px rgba(107, 70, 193, 0.12);
+        overflow: hidden;
+    }}
+
+    .hero-content {{
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+    }}
+
+    .hero-copy {{
+        flex: 1 1 360px;
+        min-width: 320px;
+    }}
+
+    .hero-copy h1 {{
+        font-size: 2.4rem;
+        margin-bottom: 18px;
+        color: {COLORS['text_dark']};
+    }}
+
+    .hero-copy p {{
+        color: {COLORS['text_dark']};
+        line-height: 1.7;
+        margin-bottom: 14px;
+    }}
+
+    .hero-image {{
+        flex: 1 1 320px;
+        min-width: 280px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 16px 35px rgba(15, 23, 42, 0.08);
+    }}
+
+    .hero-image img {{
+        width: 100%;
+        height: auto;
+        display: block;
+    }}
+
+    .hero-caption {{
+        color: {COLORS['text_light']};
+        margin: 14px 16px 0;
+        font-size: 0.95rem;
+    }}
+
+    .about-card, .feature-box {{
+        background: {COLORS['text_white']};
+        border: 1px solid rgba(107, 70, 193, 0.12);
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        min-height: 180px;
+        margin-bottom: 18px;
+    }}
+
+    .about-card:hover, .feature-box:hover {{
+        transform: translateY(-3px);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
+    }}
+
+    .about-card h3, .feature-box strong {{
+        color: {COLORS['primary_dark']};
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }}
+
+    .about-card p, .feature-box p {{
+        color: {COLORS['text_dark']};
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }}
+
+    .feature-icon {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 12px;
+        background: rgba(107, 70, 193, 0.12);
+        margin-right: 10px;
+        font-size: 1rem;
+    }}
+
+    .stButton > button {{
+        min-height: 48px !important;
+        font-size: 0.95rem !important;
+    }}
     
     /* ===== INFO BOX ===== */
     .info-box {{
@@ -339,7 +556,7 @@ def apply_global_theme():
         border-left: 5px solid {COLORS['primary']};
         padding: 20px;
         border-radius: 12px;
-        margin: 20px 0;
+        margin: 20px 0; 
         box-shadow: 0 4px 16px rgba(107, 70, 193, 0.1);
         transition: all 0.3s ease;
         animation: fadeInUp 0.6s ease-out;
@@ -347,7 +564,7 @@ def apply_global_theme():
     
     .info-box:hover {{
         box-shadow: 0 8px 24px rgba(107, 70, 193, 0.15);
-        transform: translateY(-2px);
+        # transform: translateY(-2px);
     }}
     
     .info-box strong {{
@@ -667,7 +884,7 @@ def auth_page_setup(page_title):
         font-weight: 900;
         letter-spacing: -1px;
     }}
-    
+   
     .auth-subtitle {{
         text-align: center;
         color: {COLORS['text_light']};
@@ -687,13 +904,11 @@ def auth_page_setup(page_title):
         color: {COLORS['text_white']} !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 14px 28px !important;
         font-weight: 700 !important;
-        margin-top: 1.25rem !important;
         cursor: pointer;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 8px 24px rgba(107, 70, 193, 0.35) !important;
-        position: relative;
+        position:relative;
         overflow: hidden;
     }}
     
@@ -705,6 +920,7 @@ def auth_page_setup(page_title):
     .stForm button:active {{
         transform: translateY(-1px) !important;
     }}
+    
     
     .auth-link {{
         text-align: center;

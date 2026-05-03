@@ -5,7 +5,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from components import render_sidebar_header
 from theme import apply_global_theme
 
-st.set_page_config(page_title="SafeHer - About", layout="wide")
+st.set_page_config(page_title="Rakshika-Ai- About", layout="wide")
 
 # Apply global theme
 apply_global_theme()
@@ -17,15 +17,15 @@ with st.sidebar:
 st.markdown(
     """
     <div class='hero-box'>
-      <div style='display:flex; flex-wrap:wrap; gap:24px; align-items:center;'>
-        <div style='flex:1; min-width:320px;'>
-          <h1>SafeHer: Empowering Safety Through Data</h1>
-          <p>SafeHer helps users explore crime insights, make safer choices, and connect with others via secure chat and location sharing.</p>
+      <div class='hero-content'>
+        <div class='hero-copy'>
+          <h1>Rakshika-Ai: Empowering Safety Through Data</h1>
+          <p>Rakshika-Ai helps users explore crime insights, make safer choices, and connect with others via secure chat and location sharing.</p>
           <p>Built to combine easy-to-use analytics with practical safety tools, all in one responsive web app.</p>
         </div>
-        <div style='flex:1; min-width:320px;'>
-          <img src='https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=900&q=80' width='100%' style='border-radius:18px; border:1px solid rgba(148,163,184,0.2);' />
-          <p style='color:#94a3b8; margin-top:12px; font-size:0.95rem;'>Community safety and awareness</p>
+        <div class='hero-image'>
+          <img src='https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=900&q=80' alt='Community safety' />
+          <p class='hero-caption'>Community safety and awareness</p>
         </div>
       </div>
     </div>
@@ -50,12 +50,12 @@ with col3:
         st.switch_page("pages/2_dashboard.py")
 
 
-st.markdown("### What SafeHer Provides")
+st.markdown("### What Rakshika-Ai Provides")
 row1, row2 = st.columns(2)
 with row1:
     st.markdown(
         """
-        <div class='card'>
+        <div class='about-card'>
           <h3>Data-driven insights</h3>
           <p>Analyze crime trends, identify the highest risk areas, and understand the story behind state-level data.</p>
         </div>
@@ -64,7 +64,7 @@ with row1:
     )
     st.markdown(
         """
-        <div class='card'>
+        <div class='about-card'>
           <h3>Secure chat experience</h3>
           <p>Send messages and share optional location details securely while keeping the chat experience fast and user-friendly.</p>
         </div>
@@ -74,7 +74,7 @@ with row1:
 with row2:
     st.markdown(
         """
-        <div class='card'>
+        <div class='about-card'>
           <h3>Emergency awareness</h3>
           <p>Quickly find key safety numbers and the highest/lowest risk states so you can respond faster.</p>
         </div>
@@ -83,7 +83,7 @@ with row2:
     )
     st.markdown(
         """
-        <div class='card'>
+        <div class='about-card'>
           <h3>Clean modern design</h3>
           <p>A polished UI with responsive layouts that makes data exploration simple for every user.</p>
         </div>
@@ -93,7 +93,7 @@ with row2:
 
 st.markdown("---")
 
-st.markdown("### How to use SafeHer")
+st.markdown("### How to use Rakshika-Ai")
 with st.container():
     st.markdown(
         """
@@ -127,7 +127,7 @@ st.markdown("---")
 
 st.markdown(
     """
-    <div class='card'>
+    <div class='about-card'>
       <h3>Built with</h3>
       <ul>
         <li><strong>Streamlit</strong> for the frontend UI.</li>
@@ -144,7 +144,7 @@ st.markdown(
 st.markdown("---")
 
 st.markdown("### More about the project")
-st.write("SafeHer is designed to bring safety awareness to users through data, communication, and clear visual summaries. It's a learning-focused project that can evolve into a full safety platform with real-time alerts and secure user management.")
+st.write("Rakshika-Ai is designed to bring safety awareness to users through data, communication, and clear visual summaries. It's a learning-focused project that can evolve into a full safety platform with real-time alerts and secure user management.")
 
 st.markdown("### Contact & extend")
 st.write("If you want to improve this app, you can add a notification system, map-based incident reporting, or user authentication tokens for stronger security.")

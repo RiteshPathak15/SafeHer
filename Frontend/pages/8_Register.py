@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from theme import apply_global_theme, auth_page_setup
 
-st.set_page_config(page_title="SafeHer - Register", layout="centered")
+st.set_page_config(page_title="Rakshika-Ai - Register", layout="centered")
 
 # Apply theme
 auth_page_setup("Register")
@@ -42,8 +42,8 @@ def validate_full_name(name):
     return True, "Valid"
 
 # ---------- UI ----------
-st.title("SafeHer Registration")
-st.markdown('<p style="text-align:center; color:#aaa; font-size:14px;">Create your account to join SafeHer</p>', unsafe_allow_html=True)
+st.title("Rakshika-Ai Registration")
+st.markdown('<p style="text-align:center; color:#aaa; font-size:14px;">Create your account to join Rakshika-Ai</p>', unsafe_allow_html=True)
 
 with st.form("register_form"):
     full_name = st.text_input("Full Name")

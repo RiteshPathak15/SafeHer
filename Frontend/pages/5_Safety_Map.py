@@ -46,7 +46,7 @@ if selected_state == "🇮🇳 India (All States)":
     state_df = df.copy()
     state_name = "India"
 else:
-    state_df = df[df['STATE/UT'] == selected_state]
+    state_df = df[df['STATE/UT'] == selected_state].copy()
     state_name = selected_state
     
 if selected_year != "All Years":
@@ -64,14 +64,39 @@ st.subheader(f"District Crime Summary in {state_name} {year_text}")
 
 # State total card
 total_crimes = district_crimes['Filtered Crimes'].sum()
-st.metric(label=f"Total Crimes in {state_name}", value=f"{int(total_crimes):,}")
+
+st.markdown(f"""
+<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px;'>
+  <div class='safety-card'>
+    <div class='card-title'>Total Crimes in {state_name}</div>
+    <div class='card-value'>{int(total_crimes):,}</div>
+    <div class='card-subtitle'>{year_text}</div>
+  </div>
+  <div class='safety-card'>
+    <div class='card-title'>Selected State</div>
+    <div class='card-value'>{state_name}</div>
+    <div class='card-subtitle'>Crime types selected: {len(crime_types)}</div>
+  </div>
+  <div class='safety-card'>
+    <div class='card-title'>Selected Year</div>
+    <div class='card-value'>{year_text}</div>
+    <div class='card-subtitle'>Current filter snapshot</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Display top districts as cards
 top_districts = district_crimes.head(5)
 cols = st.columns(len(top_districts))
 for i, (_, row) in enumerate(top_districts.iterrows()):
     with cols[i]:
-        st.metric(label=row['DISTRICT'], value=f"{int(row['Filtered Crimes']):,}")
+        st.markdown(f"""
+        <div class='safety-card'>
+            <div class='card-title'>{row['DISTRICT']}</div>
+            <div class='card-value'>{int(row['Filtered Crimes']):,}</div>
+            <div class='card-subtitle'>Top district</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Choropleth map for states (India level)
 map_year_text = "All Years" if selected_year == "All Years" else str(selected_year)
@@ -196,24 +221,41 @@ if selected_state != "🇮🇳 India (All States)":
 # Helpline section
 st.subheader("🚨 Emergency Helplines & Protection Resources")
 
-# Helplines in columns
 if selected_state in helplines:
-    st.write(f"**{selected_state} Emergency Contacts:**")
+    st.markdown(f"**{selected_state} Emergency Contacts:**")
     cols = st.columns(len(helplines[selected_state]))
     for i, (key, value) in enumerate(helplines[selected_state].items()):
         with cols[i]:
-            st.metric(label=key, value=value)
+            st.markdown(f"""
+            <div class='safety-card'>
+                <div class='card-title'>{key}</div>
+                <div class='card-value'>{value}</div>
+                <div class='card-subtitle'>Emergency contact</div>
+            </div>
+            """, unsafe_allow_html=True)
             if st.button(f"Call {key}", key=f"call_{key}_{i}"):
                 st.info(f"Dial {value} for {key}")
 else:
-    st.write("Helpline data not available for this state. General: Police 100, Women Helpline 181")
+    st.markdown("**Helpline data not available for this state. General contacts:**")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric(label="Police", value="100")
+        st.markdown(f"""
+        <div class='safety-card'>
+            <div class='card-title'>Police</div>
+            <div class='card-value'>100</div>
+            <div class='card-subtitle'>General emergency</div>
+        </div>
+        """, unsafe_allow_html=True)
         if st.button("Call Police"):
             st.info("Dial 100 for Police")
     with col2:
-        st.metric(label="Women Helpline", value="181")
+        st.markdown(f"""
+        <div class='safety-card'>
+            <div class='card-title'>Women Helpline</div>
+            <div class='card-value'>181</div>
+            <div class='card-subtitle'>Support line</div>
+        </div>
+        """, unsafe_allow_html=True)
         if st.button("Call Women Helpline"):
             st.info("Dial 181 for Women Helpline")
 
@@ -250,19 +292,31 @@ with st.expander("🛡️ Personal Safety Tips", expanded=True):
 
 # Additional resources
 st.subheader("📚 Additional Resources")
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown("**National Commission for Women**")
-    st.write("Helpline: 011-26942369")
-    st.write("Website: ncw.nic.in")
-with col2:
-    st.markdown("**Ministry of Women & Child Development**")
-    st.write("Helpline: 1098 (Child Helpline)")
-    st.write("Website: wcd.nic.in")
-with col3:
-    st.markdown("**One Stop Centre (OSC)**")
-    st.write("For women in distress")
-    st.write("Dial 181 for location")
+cols = st.columns(3)
+with cols[0]:
+    st.markdown(f"""
+    <div class='safety-card'>
+        <div class='card-title'>National Commission for Women</div>
+        <div class='card-value'>011-26942369</div>
+        <div class='card-subtitle'>Website: ncw.nic.in</div>
+    </div>
+    """, unsafe_allow_html=True)
+with cols[1]:
+    st.markdown(f"""
+    <div class='safety-card'>
+        <div class='card-title'>Ministry of Women & Child Development</div>
+        <div class='card-value'>1098</div>
+        <div class='card-subtitle'>Website: wcd.nic.in</div>
+    </div>
+    """, unsafe_allow_html=True)
+with cols[2]:
+    st.markdown(f"""
+    <div class='safety-card'>
+        <div class='card-title'>One Stop Centre (OSC)</div>
+        <div class='card-value'>Dial 181 for location</div>
+        <div class='card-subtitle'>For women in distress</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
 st.caption("Remember: Prevention is key. Stay aware, stay safe.")

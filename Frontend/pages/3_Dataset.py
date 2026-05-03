@@ -49,7 +49,7 @@ DATASET_INFO = {
 }
 
 # -------- DATASET SELECTION --------
-st.markdown("### � Select Dataset for Analysis")
+st.markdown("### 📂 Select Dataset for Analysis")
 
 # Create cards for each dataset
 cols = st.columns(len(csv_files))
@@ -86,56 +86,101 @@ st.markdown("## 🔍 Data Profiling & Quality Check")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric("📏 Shape", f"{df.shape[0]} × {df.shape[1]}")
+    st.markdown(f"""
+    <div class='metric-card'>
+        <div style='font-size: 2rem; margin-bottom: 8px;'>📏</div>
+        <div class='metric-label'>Dataset Shape</div>
+        <div class='metric-value'>{df.shape[0]:,} rows</div>
+        <div style='font-size: 0.9rem; opacity: 0.9;'>{df.shape[1]} columns</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col2:
     missing_pct = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
-    st.metric("❓ Missing Data", f"{missing_pct:.1f}%")
+    st.markdown(f"""
+    <div class='metric-card'>
+        <div style='font-size: 2rem; margin-bottom: 8px;'>❓</div>
+        <div class='metric-label'>Missing Data</div>
+        <div class='metric-value'>{missing_pct:.1f}%</div>
+        <div style='font-size: 0.9rem; opacity: 0.9;'>{int(df.isnull().sum().sum())} cells</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col3:
     dup_count = df.duplicated().sum()
-    st.metric("🔄 Duplicates", dup_count)
+    st.markdown(f"""
+    <div class='metric-card'>
+        <div style='font-size: 2rem; margin-bottom: 8px;'>🔄</div>
+        <div class='metric-label'>Duplicate Rows</div>
+        <div class='metric-value'>{dup_count}</div>
+        <div style='font-size: 0.9rem; opacity: 0.9;'>{(dup_count/df.shape[0]*100):.1f}% duplicates</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col4:
     memory_mb = df.memory_usage(deep=True).sum() / 1024 / 1024
-    st.metric("💾 Memory", f"{memory_mb:.1f} MB")
+    st.markdown(f"""
+    <div class='metric-card'>
+        <div style='font-size: 2rem; margin-bottom: 8px;'>💾</div>
+        <div class='metric-label'>Memory Usage</div>
+        <div class='metric-value'>{memory_mb:.2f} MB</div>
+        <div style='font-size: 0.9rem; opacity: 0.9;'>Dataset size</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Data quality checks
 st.markdown("### 📋 Data Quality Report")
 quality_cols = st.columns(3)
 
 with quality_cols[0]:
-    st.markdown("**Column Types:**")
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(219, 39, 119, 0.05)); border-left: 5px solid #6B46C1; padding: 20px; border-radius: 12px; margin: 10px 0;'>
+        <strong style='color: #6B46C1; font-size: 1.05rem;'>📊 Column Types</strong>
+    """, unsafe_allow_html=True)
     dtype_counts = df.dtypes.value_counts()
     for dtype, count in dtype_counts.items():
-        st.write(f"- {dtype}: {count}")
+        st.write(f"  • **{dtype}:** {count}")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with quality_cols[1]:
-    st.markdown("**Missing Values by Column:**")
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(219, 39, 119, 0.05)); border-left: 5px solid #6B46C1; padding: 20px; border-radius: 12px; margin: 10px 0;'>
+        <strong style='color: #6B46C1; font-size: 1.05rem;'>⚠️ Missing Values</strong>
+    """, unsafe_allow_html=True)
     missing_by_col = df.isnull().sum()
     missing_cols = missing_by_col[missing_by_col > 0]
     if len(missing_cols) > 0:
         for col, count in missing_cols.head(5).items():
             pct = (count / len(df)) * 100
-            st.write(f"- {col}: {count} ({pct:.1f}%)")
+            st.write(f"  • **{col}:** {count} ({pct:.1f}%)")
     else:
-        st.write("✅ No missing values!")
+        st.markdown("  ✅ **No missing values!**")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with quality_cols[2]:
-    st.markdown("**Data Range Check:**")
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(219, 39, 119, 0.05)); border-left: 5px solid #6B46C1; padding: 20px; border-radius: 12px; margin: 10px 0;'>
+        <strong style='color: #6B46C1; font-size: 1.05rem;'>📈 Data Range Check</strong>
+    """, unsafe_allow_html=True)
     numeric_cols = df.select_dtypes(include=[np.number]).columns
     if len(numeric_cols) > 0:
-        st.write(f"Numeric columns: {len(numeric_cols)}")
+        st.write(f"  • **Numeric columns:** {len(numeric_cols)}")
         negative_vals = (df[numeric_cols] < 0).sum().sum()
-        st.write(f"Negative values: {negative_vals}")
+        st.write(f"  • **Negative values:** {negative_vals}")
         zero_vals = (df[numeric_cols] == 0).sum().sum()
-        st.write(f"Zero values: {zero_vals}")
+        st.write(f"  • **Zero values:** {zero_vals}")
     else:
-        st.write("No numeric columns found")
+        st.write("  No numeric columns found")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # -------- EMERGENCY RESOURCES BANNER --------
 st.markdown("""
-<div class='emergency-banner'>
-    <h3>🚨 Women's Safety Emergency Helplines</h3>
-    <p><strong>National Helpline:</strong> 1091 | <strong>Police:</strong> 100 | <strong>Women Helpline:</strong> 181</p>
-    <p><em>In case of emergency, call immediately!</em></p>
+<div style='background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%); padding: 24px; border-radius: 14px; 
+            box-shadow: 0 12px 32px rgba(220, 38, 38, 0.25); margin: 20px 0; border-left: 6px solid #B91C1C;'>
+    <h3 style='color: white; margin-bottom: 12px; font-size: 1.3rem;'>🚨 Women's Safety Emergency Helplines</h3>
+    <div style='display: flex; gap: 20px; flex-wrap: wrap; font-weight: 600; color: white; font-size: 0.95rem;'>
+        <div>📱 <strong>National Helpline:</strong> 1091</div>
+        <div>🚔 <strong>Police:</strong> 100</div>
+        <div>☎️ <strong>Women Helpline:</strong> 181</div>
+    </div>
+    <p style='color: rgba(255,255,255,0.9); margin-top: 12px; font-style: italic;'>⚠️ In case of emergency, call immediately!</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -186,13 +231,41 @@ with analysis_tabs[0]:
             st.markdown(f"**Statistical Tests for {selected_col}:**")
             test_cols = st.columns(4)
             with test_cols[0]:
-                st.metric("Mean", f"{df[selected_col].mean():.2f}")
+                mean_val = df[selected_col].mean()
+                st.markdown(f"""
+                <div class='metric-card'>
+                    <div style='font-size: 1.8rem; margin-bottom: 8px;'>📊</div>
+                    <div class='metric-label'>Mean</div>
+                    <div class='metric-value' style='font-size: 1.8rem;'>{mean_val:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with test_cols[1]:
-                st.metric("Median", f"{df[selected_col].median():.2f}")
+                median_val = df[selected_col].median()
+                st.markdown(f"""
+                <div class='metric-card'>
+                    <div style='font-size: 1.8rem; margin-bottom: 8px;'>📈</div>
+                    <div class='metric-label'>Median</div>
+                    <div class='metric-value' style='font-size: 1.8rem;'>{median_val:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with test_cols[2]:
-                st.metric("Std Dev", f"{df[selected_col].std():.2f}")
+                std_val = df[selected_col].std()
+                st.markdown(f"""
+                <div class='metric-card'>
+                    <div style='font-size: 1.8rem; margin-bottom: 8px;'>📉</div>
+                    <div class='metric-label'>Std Dev</div>
+                    <div class='metric-value' style='font-size: 1.8rem;'>{std_val:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with test_cols[3]:
-                st.metric("Skewness", f"{df[selected_col].skew():.2f}")
+                skew_val = df[selected_col].skew()
+                st.markdown(f"""
+                <div class='metric-card'>
+                    <div style='font-size: 1.8rem; margin-bottom: 8px;'>⚖️</div>
+                    <div class='metric-label'>Skewness</div>
+                    <div class='metric-value' style='font-size: 1.8rem;'>{skew_val:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
     else:
         st.warning("No numeric columns available for statistical analysis.")
